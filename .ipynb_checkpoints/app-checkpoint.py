@@ -6,16 +6,13 @@ from PIL import Image
 import pandas as pd
 
 
-# Load Model & Scaler & Polynomial Features
+# Load Model
 
 model=joblib.load('model.pkl')
-sc=joblib.load('sc.pkl')
-pf=joblib.load('pf.pkl')
 
-# load dataset
+# load datase
 
-df_final=pd.read_csv('test.csv')
-df_main=pd.read_csv('main.csv')
+df_main=pd.read_csv('test.csv')
 
 # Load Image
 
@@ -25,20 +22,22 @@ image=Image.open('img.png')
 
 def main():
     st.image(image,width=650)
-    st.title('Yield Crop Prediction')
+    st.title('Heart Disease Prediction')
     html_temp='''
     <div style='background-color:red; padding:12px'>
-    <h1 style='color:  #000000; text-align: center;'>Yield Crop Prediction Machine Learning Model</h1>
+    <h1 style='color:  #000000; text-align: center;'>Heart Disease Prediction Machine Learning Model</h1>
     </div>
     <h2 style='color:  red; text-align: center;'>Please Enter Input</h2>
     '''
     st.markdown(html_temp,unsafe_allow_html=True)
-    country= st.selectbox("Type or Select a Country from the Dropdown.",df_main['area'].unique()) 
-    crop= st.selectbox("Type or Select a Crop from the Dropdown.",df_main['item'].unique()) 
-    average_rainfall=st.number_input('Enter Average Rainfall (mm-per-year).',value=None)
-    presticides=st.number_input('Enter Pesticides per Tonnes Use (tonnes of active ingredients).',value=None)
-    avg_temp=st.number_input('Enter Average Temperature (degree celcius).',value=None)
-    input=[country,crop,average_rainfall,presticides,avg_temp]
+    age=st.number_input('Enter Your Age.',value=None)
+    chest_pain= st.selectbox("(Chest_pain(0:Typical angina (chest pain related decrease blood supply to the heart) or 1: Atypical angina (chest pain not related to heart) or 2: Non-anginal pain (typically esophageal spasms) or 3: Asymptomatic (chest pain not showing signs of disease)))",df_main['chest_pain'].unique())
+    blood_pressure=st.number_input('Enter Your Blood-Pressure(normal range:-(130-140)).',value=None)
+    cholesterol=st.number_input('Enter Your cholesterol(above 200 is cause for concern).',value=None)
+    fasting_blood_sugar= st.selectbox("Fasting-Blood-Sugar((fasting blood sugar > 120 mg/dl) (1 = above 120 or 0 = below 120)).",df_main['fasting_blood_sugar'].unique()) 
+    ecg= st.selectbox("ECG (0: Nothing to note or 1: mild symptoms to severe problems signals non-normal heartbeat or 2: symptoms of abnormal heartbeat).",df_main['ecg'].unique())
+    max_heart_rate=st.number_input('Maximum Heart Rate of Person(Maximum Heart Rate in per minute).',value=None)
+    input=[age,chest_pain,blood_pressure,cholesterol,fasting_blood_sugar,ecg,max_heart_rate]
     result=''
     if st.button('Predict',''):
         result=prediction(input)
@@ -49,32 +48,17 @@ def main():
      '''.format(result)
     st.markdown(temp,unsafe_allow_html=True)
     
-    
-    
+
 
 # Prediction Function to predict from model.
-# Albania	Soybeans	1990	7000	1485.0	121.00	16.37
-# input=['Albania','Soybeans',1485.0,121.00,16.37]
-def update_columns(df, true_columns):
-    df[true_columns] = True
-    other_columns = df.columns.difference(true_columns)
-    df[other_columns] = False
-    return df
+
 def prediction(input):
-    categorical_col=input[:2]
-    input_df=pd.DataFrame({'average_rainfall':input[2],'presticides_tonnes':input[3],'avg_temp':input[4]},index=[0])
-    input_df1=df_final.head(1)
-    input_df1=input_df1.iloc[:,3:]
-    true_columns = [f'Country_{categorical_col[0]}',f'Item_{categorical_col[1]}']
-    input_df2= update_columns(input_df1, true_columns)
-    final_df=pd.concat([input_df,input_df2],axis=1)
-    final_df=final_df.values
-    test_input=sc.transform(final_df)
-    test_input1=pf.transform(test_input)
-    predict=model.predict(test_input1)
-    result=(int(((predict[0]/100)*2.47105) * 100) / 100)
-    return (f"The Production of Crop Yields:- {result} quintel/acers yield Production. "
-            f"That means 1 acers of land produce {result} quintel of yield crop. It's all depend on different Parameter like average rainfall, average temperature, soil and many more.")
+    test=[input]
+    predict=model.predict(test)
+    if predict==0:
+        return ("Hello Dear! It's great to hear that you're not experiencing any symptoms related to heart disease. Remember to keep up with your healthy lifestyle choices and regular check-ups to maintain your well-being. If you ever have any health concerns or questions, feel free to reach out. Wishing you continued good health and happiness! 😊😊😊😊😊")
+    else:
+        return ("Hello Dear! Your heart disease prediction indicates symptoms present. It's crucial to prioritize your health and seek medical attention promptly. Consulting with a doctor can provide vital support and guidance for your well-being.😔😔😔😔😔")
 
 
 if __name__=='__main__':

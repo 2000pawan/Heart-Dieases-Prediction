@@ -6,7 +6,7 @@ from PIL import Image
 import pandas as pd
 
 
-# Load Model & Scaler & Polynomial Features
+# Load Model
 
 model=joblib.load('model.pkl')
 
@@ -51,8 +51,6 @@ def main():
 
 
 # Prediction Function to predict from model.
-# Albania	Soybeans	1990	7000	1485.0	121.00	16.37
-# input=['Albania','Soybeans',1485.0,121.00,16.37]
 
 def prediction(input):
     test=[input]
